@@ -51,7 +51,7 @@ func TestCheckLatest(t *testing.T) {
 		arch = "arm64"
 	}
 
-	rex := regexp.MustCompile(`([^:]+):v?(\d+\.\d+\.\d+)[^:]+:[^:]+`)
+	rex := regexp.MustCompile(`([^:]*):v?(\d+\.\d+\.\d+)[^:]*:[^:]*`)
 
 	verMatch := rex.FindStringSubmatch(ver)
 	if len(verMatch) <= 2 {
