@@ -18,10 +18,11 @@ import (
 	"debug/elf"
 	"errors"
 	"fmt"
-	"github.com/gojue/ecapture/user/config"
 	"os"
 	"regexp"
 	"strings"
+
+	"github.com/gojue/ecapture/user/config"
 )
 
 const (
@@ -82,6 +83,7 @@ func (m *MOpenSSLProbe) initOpensslOffset() {
 		"boringssl 1.1.1":      "boringssl_a_13_kern.o",
 		"boringssl_a_13":       "boringssl_a_13_kern.o",
 		"boringssl_a_14":       "boringssl_a_14_kern.o",
+		"boringssl_a_15":       "boringssl_a_15_kern.o",
 		AndroidDefauleFilename: "boringssl_a_13_kern.o",
 
 		// non-Android boringssl
@@ -253,11 +255,23 @@ func (m *MOpenSSLProbe) detectOpenssl(soPath string) (error, string) {
 
 func (m *MOpenSSLProbe) getSoDefaultBytecode(soPath string, isAndroid bool) string {
 	var bpfFile string
-
+	var found bool
 	// if not found, use default
 	if isAndroid {
 		m.conf.(*config.OpensslConfig).SslVersion = AndroidDefauleFilename
-		bpfFile, _ = m.sslVersionBpfMap[AndroidDefauleFilename]
+		androidVer := m.conf.(*config.OpensslConfig).AndroidVer
+		if androidVer != "" {
+			bpfFileKey := fmt.Sprintf("boringssl_a_%s", androidVer)
+			bpfFile, found = m.sslVersionBpfMap[bpfFileKey]
+			if found {
+				return bpfFile
+			}
+		}
+		bpfFile, found = m.sslVersionBpfMap[AndroidDefauleFilename]
+		if !found {
+			m.logger.Warn().Str("BoringSSL Version", AndroidDefauleFilename).Msg("Can not find Default BoringSSL version")
+			return ""
+		}
 		//m.logger.Warn().Str("BoringSSL Version", AndroidDefauleFilename).Msg("OpenSSL/BoringSSL version not found, used default version")
 		return bpfFile
 	}
