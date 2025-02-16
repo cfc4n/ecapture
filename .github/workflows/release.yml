@@ -122,8 +122,6 @@ jobs:
           file: ./builder/Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
-          cache-from: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/ecapture:buildcache
-          cache-to: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/ecapture:buildcache,mode=max
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/ecapture:${{ github.ref_name }}
             ${{ secrets.DOCKERHUB_USERNAME }}/ecapture:latest
